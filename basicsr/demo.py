@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------
 import torch
 import os
+import cv2
 import glob
 
 from basicsr.models import create_model
@@ -33,6 +34,12 @@ def main():
             img = imfrombytes(img_bytes, float32=True)
         except:
             raise Exception("path {} not working".format(input_path))
+        fm = cv2.Laplacian(img, cv2.CV_64F).var()
+        if fm > 100:
+            print(f'{input_path} is not too blurry ({fm}), skipping.')
+        else:
+            print(f'{input_path} is too blurry ({fm}), deblurring.')
+
         img = img2tensor(img, bgr2rgb=True, float32=True)
 
         model.feed_data(data={'lq': img.unsqueeze(dim=0)})
